@@ -14,7 +14,6 @@
     h1{color:var(--primary);font-size:1.25rem;margin-bottom:12px}
     label{font-size:0.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
     select,input{width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);background:#fafafa}
-    .row{display:flex;gap:12px}
     .btn{display:inline-block;background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
     .out{background:#f1f5f9;border-radius:10px;padding:12px;margin-top:12px;min-height:76px;border:1px solid var(--border);white-space:pre-wrap}
     footer{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
@@ -40,7 +39,6 @@
 
   <script>
   (function(){
-    // Templates
     const templates = {
       money:{
         inputs:[{id:'name',label:"Friend's name",ph:'Chris'},{id:'amount',label:'Amount owed ($)',ph:'25'},{id:'event',label:'What was it for?',ph:'concert tickets'}],
@@ -136,10 +134,7 @@
     function flashCopied(){ copyBtn.textContent='Copied!'; copyBtn.style.background='#10b981'; setTimeout(()=>{copyBtn.textContent='Copy to Clipboard'; copyBtn.style.background=''},1200); }
 
     scenario.addEventListener('change',renderFields);
-
-    // init
     populateScenarios(); scenario.value='money'; renderFields();
-
   })();
   </script>
 </body>
