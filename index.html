@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ScriptFlip | Fill-in-the-Blanks Message Generator</title>
   <meta name="description" content="ScriptFlip helps you write polite, stress-free messages for awkward life situations.">
-  <meta name="keywords" content="message generator, polite message generator, awkward situation text generator, decline invitation message, cancel plans message, asking for money message, subscription cancellation email, sick day notice template, awkward text generator, polite excuse generator, copy message text, fill in the blanks message maker, script template generator, communication templates">
+  <meta name="keywords" content="message generator, polite message generator, awkward situation text generator, decline invitation message, cancel plans message, asking for money message, subscription cancellation, return borrowed item, resignation letter, noisy neighbor">
   <style>
     :root{--bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--border:#e2e8f0;--r:14px}
     *{box-sizing:border-box;margin:0;padding:0}
@@ -41,7 +41,7 @@
   <script>
   (function(){
     const templates = {
-      money:{
+      "payment-request":{
         inputs:[{id:'name',label:"Friend's name",ph:'Chris'},{id:'amount',label:'Amount owed ($)',ph:'25'},{id:'event',label:'What was it for?',ph:'concert tickets'}],
         build:v=>`Hey ${v.name}, hope you're well. Quick one — did you get a chance to send the $${v.amount} for ${v.event}? No rush, just checking in as I'm sorting my budget. Thanks!`
       },
@@ -88,10 +88,14 @@
     const preview = document.getElementById('preview');
     const copyBtn = document.getElementById('copyBtn');
 
+    function prettyLabel(key){
+      return key.split(/[-_]/).map(s=>s.replace(/^[a-z]/,c=>c.toUpperCase())).join(' ');
+    }
+
     function populateScenarios(){
       Object.keys(templates).forEach(key=>{
         const opt = document.createElement('option');
-        opt.value = key; opt.textContent = key.replace(/^[a-z]/,c=>c.toUpperCase());
+        opt.value = key; opt.textContent = prettyLabel(key);
         scenario.appendChild(opt);
       });
     }
@@ -135,7 +139,7 @@
     function flashCopied(){ copyBtn.textContent='Copied!'; copyBtn.style.background='#10b981'; setTimeout(()=>{copyBtn.textContent='Copy to Clipboard'; copyBtn.style.background=''},1200); }
 
     scenario.addEventListener('change',renderFields);
-    populateScenarios(); scenario.value='money'; renderFields();
+    populateScenarios(); scenario.value='payment-request'; renderFields();
   })();
   </script>
 </body>
