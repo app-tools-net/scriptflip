@@ -1,146 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ScriptFlip | Fill-in-the-Blanks Message Generator</title>
-  <meta name="description" content="ScriptFlip helps you write polite, stress-free messages for awkward life situations.">
-  <meta name="keywords" content="message generator, polite message generator, awkward situation text generator, decline invitation message, cancel plans message, asking for money message, subscription cancellation, roommate confrontation, workplace resignation">
-  <style>
-    :root{--bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--border:#e2e8f0;--r:14px}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;}
-    .wrap{width:100%;max-width:520px;margin:28px auto;padding:18px}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 4px 10px rgba(2,6,23,0.04)}
-    h1{color:var(--primary);font-size:1.25rem;margin-bottom:12px}
-    label{font-size:0.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-    select,input{width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);background:#fafafa}
-    .btn{display:inline-block;background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
-    .out{background:#f1f5f9;border-radius:10px;padding:12px;margin-top:12px;min-height:76px;border:1px solid var(--border);white-space:pre-wrap}
-    footer{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
-    @media (max-width:420px){.wrap{padding:12px}}
-  </style>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0">
+    <title>ScriptFlip | Free Fill-in-the-Blanks Message Generator</title>
+    <meta name="description" content="ScriptFlip helps you write polite, stress-free messages for awkward life situations. Choose a scenario, fill in the blanks, and copy your text instantly.">
+    <meta name="keywords" content="awkward text generator, polite message writer, copy paste templates, awkward situations letter maker, simple message script builder">
+    <meta name="robots" content="index, follow">
+    <style>
+        :root { --bg: #f8fafc; --surface: #ffffff; --text: #0f172a; --text-muted: #64748b; --primary: #4f46e5; --primary-hover: #4338ca; --border: #e2e8f0; --radius: 16px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; justify-content: center; }
+        .wrapper { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 16px; margin: auto 0; }
+        .card { background-color: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); text-align: center; }
+        h1 { color: var(--primary); font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; }
+        .input-box { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; text-align: left; }
+        label { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid var(--border); background-color: #fafafa; color: var(--text); border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        select:focus, input:focus { border-color: var(--primary); }
+        .output-zone { background: #f1f5f9; padding: 16px; border-radius: 12px; border: 1px solid var(--border); font-size: 0.95rem; line-height: 1.5; min-height: 80px; text-align: left; white-space: pre-wrap; margin-top: 16px; color: #334155; }
+        .btn-main { background-color: var(--primary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background 0.2s; width: 100%; margin-top: 10px; }
+        .btn-main:hover { background-color: var(--primary-hover); }
+        .crawler-block { margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px; text-align: left; }
+        .crawler-block h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+        .crawler-block p { font-size: 0.75rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 12px; }
+        .ad-space { width: 100%; background-color: var(--surface); border: 1px dashed var(--text-muted); border-radius: 12px; padding: 12px; text-align: center; box-sizing: border-box; font-size: 0.8rem; color: var(--text-muted); }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>✍️ ScriptFlip</h1>
-      <div>
-        <label for="scenario">Select your situation</label>
-        <select id="scenario"></select>
-      </div>
-      <div id="fields"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-        <button id="copyBtn" class="btn">Copy to Clipboard</button>
-      </div>
-      <div id="preview" class="out">Loading…</div>
+    <div class="wrapper">
+        <main class="card">
+            <h1>✍️ ScriptFlip</h1>
+            <div class="input-box">
+                <label>Select Your Situation</label>
+                <select id="scenarioSelect" onchange="loadScenarioFields()">
+                    <option value="money">Asking a Friend for Owed Money</option>
+                    <option value="decline">Politely Declining an Invitation</option>
+                    <option value="noise">Loud Neighbor Noise Complaint</option>
+                    <option value="cancel">Cancelling Plans Last-Minute</option>
+                    <option value="sick">Work Sick Day Notice</option>
+                    <option value="sub">Subscription / Service Cancellation</option>
+                    <option value="return">Asking for a Borrowed Item Back</option>
+                    <option value="date">Politely Declining a Second Date</option>
+                    <option value="quit">Resigning from a Casual Job</option>
+                    <option value="backingout">Backing Out of Event Contribution</option>
+                </select>
+            </div>
+            <div id="dynamicInputs"></div>
+            <button class="btn-main" onclick="generateAndCopyText()">Copy to Clipboard</button>
+            <div class="output-zone" id="outputPreview">Loading template metrics...</div>
+            <section class="crawler-block">
+                <h2>Contextual Script Structuring & Communication Layout Matrices</h2>
+                <p>ScriptFlip incorporates modular client-side string concatenation variables designed to map custom phrase inputs into rigid interpersonal communication layouts. Bypassing slow AI server computation routines guarantees lightning-fast loading speeds across all mobile device viewports.</p>
+                <h2>Privacy-First Localized Data Input Processing</h2>
+                <p>Your custom names, event descriptions, and scenario variables process entirely inside local memory sandboxes. Zero databases, no external network calls, and complete cookie decoupling optimize performance while guaranteeing total personal data isolation natively.</p>
+            </section>
+        </main>
+        <footer class="ad-space"><div style="font-weight:700; font-size:0.65rem; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px;">Independent App Support</div>This web utility is free and tracker-free.</footer>
     </div>
-    <footer>Privacy-first. No network calls; everything runs in your browser.</footer>
-  </div>
-
-  <script>
-  (function(){
+<script>
     const templates = {
-      "payment-request":{
-        inputs:[{id:'name',label:"Friend's name",ph:'Chris'},{id:'amount',label:'Amount owed ($)',ph:'25'},{id:'event',label:'What was it for?',ph:'concert tickets'}],
-        build:v=>`Hey ${v.name}, hope you're well. Quick one — did you get a chance to send the $${v.amount} for ${v.event}? No rush, just checking in as I'm sorting my budget. Thanks!`
-      },
-      decline:{
-        inputs:[{id:'name',label:"Person's name",ph:'Sarah'},{id:'event',label:'What is the event?',ph:'the birthday dinner on Friday'}],
-        build:v=>`Hi ${v.name}, thanks so much for inviting me to ${v.event}. It sounds lovely, but I won't be able to make it this time. I hope you have a wonderful time!`
-      },
-      noise:{
-        inputs:[{id:'time',label:'When did the noise happen?',ph:'last night around 11pm'},{id:'sound',label:'What was the sound?',ph:'loud bass from music'}],
-        build:v=>`Hi neighbor — hope you're well. Just letting you know that ${v.sound} came through my walls ${v.time}. I wanted to mention it in case you're not aware. Thanks for understanding.`
-      },
-      cancel:{
-        inputs:[{id:'name',label:"Friend's name",ph:'Alex'},{id:'event',label:'What plan are you cancelling?',ph:'our lunch catch up today'}],
-        build:v=>`Hey ${v.name}, I'm really sorry but I need to cancel ${v.event} — I'm not feeling up to it today. I'm happy to reschedule when things calm down. Sorry again.`
-      },
-      sick:{
-        inputs:[{id:'boss',label:'Manager / boss name',ph:'Terry'},{id:'coverage',label:'Coverage note',ph:'Emily will cover my tickets'}],
-        build:v=>`Hi ${v.boss}, I'm unwell today and won't be able to work. I'll rest and aim to be back tomorrow. ${v.coverage ? 'Note: ' + v.coverage + '.' : ''}`
-      },
-      sub:{
-        inputs:[{id:'company',label:'Business / gym name',ph:'Aura Fitness'},{id:'id',label:'Account / member ID',ph:'MEM-8849'}],
-        build:v=>`To whom it may concern at ${v.company},\n\nPlease cancel my subscription associated with ID ${v.id}, effective immediately. Please confirm once processed.\n\nThank you.`
-      },
-      return:{
-        inputs:[{id:'name',label:"Friend's name",ph:'Jordan'},{id:'item',label:'Borrowed item',ph:'camping tent'}],
-        build:v=>`Hey ${v.name}, hope you're well. I'm sorting things this weekend and realized I need ${v.item} back. Could I pick it up or would you like to drop it off? Thanks!`
-      },
-      date:{
-        inputs:[{id:'name',label:"Date's name",ph:'Taylor'},{id:'activity',label:'What did you do?',ph:'getting drinks last night'}],
-        build:v=>`Hey ${v.name}, thanks again for ${v.activity}. I enjoyed meeting you, but I didn't feel a strong romantic connection. Wishing you all the best.`
-      },
-      quit:{
-        inputs:[{id:'manager',label:'Manager name',ph:'Dave'},{id:'role',label:'Your position',ph:'evening assistant'},{id:'date',label:'Last day',ph:'Friday the 23rd'}],
-        build:v=>`Hi ${v.manager},\n\nPlease accept this as my resignation from the position of ${v.role}, with my last day being ${v.date}. Thank you for the opportunity.`
-      },
-      backingout:{
-        inputs:[{id:'organiser',label:'Organiser / group',ph:'the picnic group chat'},{id:'contribution',label:'What were you bringing?',ph:'speaker and ice'}],
-        build:v=>`Hey ${v.organiser}, sorry for the late notice, but I can't handle ${v.contribution} anymore due to unexpected issues. I'm really sorry — happy to help find a replacement.`
-      }
+        money: {
+            inputs: [{id:'name',label:"Friend's Name",ph:"Chris"},{id:'amount',label:"Amount Owed (\$)",ph:"25"},{id:'event',label:"What was it for?",ph:"the concert tickets"}],
+            build: (v) => `Hey ${v.name}, hope you're having a good week! Just doing a quick pass on my budget—did you get a chance to look at sending through that $${v.amount} for ${v.event} yet? No massive rush, just trying to keep my accounts sorted. Cheers!`
+        },
+        decline: {
+            inputs: [{id:'name',label:"Person's Name",ph:"Sarah"},{id:'event',label:"What is the event?",ph:"the birthday dinner on Friday"}],
+            build: (v) => `Hi ${v.name}, thanks so much for the invite to ${v.event}! It sounds like it's going to be great, but I unfortunately won't be able to make it this time around. Hope you all have an amazing time, and let's catch up soon for a quiet coffee instead!`
+        },
+        noise: {
+            inputs: [{id:'time',label:"When did the noise happen?",ph:"last night around 11pm"},{id:'sound',label:"What was the sound?",ph:"the loud music bass"}],
+            build: (v) => `Hi neighbor, hope you're well. Just dropping a quick note to let you know that ${v.sound} was coming through the walls pretty clearly ${v.time}. I have to get up early for work, so if you could keep an eye on the volume after 10pm it would be a massive help. Thanks for understanding!`
+        },
+        cancel: {
+            inputs: [{id:'name',label:"Friend's Name",ph:"Alex"},{id:'event',label:"What plan are you cancelling?",ph:"our lunch catch up today"}],
+            build: (v) => `Hey ${v.name}, I am incredibly sorry to do this last minute, but I'm feeling completely run down today and don't think I'll be able to make it to ${v.event}. I was really looking forward to it, but I just need to rest up. Can we reschedule for sometime next week?`
+        },
+        sick: {
+            inputs: [{id:'boss',label:"Manager / Boss Name",ph:"Terry"},{id:'coverage',label:"Task Coverage Note",ph:"Emily is watching my inbox"}],
+            build: (v) => `Hi ${v.boss}, unfortunately, I woke up feeling quite unwell today and won't be able to log in or come to work. I plan to rest up and hope to be back tomorrow. ${v.coverage}. I'll update you on my progress later this afternoon.`
+        },
+        sub: {
+            inputs: [{id:'company',label:"Business / Gym Name",ph:"Aura Fitness"},{id:'id',label:"Account / Member ID",ph:"MEM-8849"}],
+            build: (v) => `To Whom It May Concern at ${v.company},\n\nPlease accept this message as formal notification that I wish to cancel my active account subscription effective immediately under ID ${v.id}. Please confirm via email that this request has been processed and that all recurring billing constraints linked to my profile have been removed. Thank you.`
+        },
+        return: {
+            inputs: [{id:'name',label:"Friend's Name",ph:"Jordan"},{id:'item',label:"Borrowed Item",ph:"my camping tent"}],
+            build: (v) => `Hey ${v.name}, hope everything is going well! I'm doing a bit of sorting around the house today and realized I actually need to use ${v.item} sometime this weekend. Let me know when is a good time for me to drop by and pick it up from you, or if you're passing my area anytime soon. Cheers!`
+        },
+        date: {
+            inputs: [{id:'name',label:"Date's Name",ph:"Taylor"},{id:'activity',label:"What did you do?",ph:"getting drinks last night"}],
+            build: (v) => `Hey ${v.name}, thanks again for ${v.activity}! I had a really nice time chatting with you. You're a great person, but to be completely honest, I didn't quite feel that romantic spark between us. I wanted to be upfront about it, but I wish you absolutely the best out there!`
+        },
+        quit: {
+            inputs: [{id:'manager',label:"Manager Name",ph:"Dave"},{id:'role',label:"Your Position",ph:"evening floor assistant"},{id:'date',label:"Your Last Day",ph:"Friday the 23rd"}],
+            build: (v) => `Hi ${v.manager},\n\nPlease accept this message as notification that I am resigning from my position as ${v.role}. My last available shift day will be ${v.date}. I really appreciate the opportunities I've had while working with the team here, and I'll ensure my remaining shifts are fully completed with total coverage. Thank you.`
+        },
+        backingout: {
+            inputs: [{id:'organiser',label:"Organiser / Group Name",ph:"the picnic group chat"},{id:'contribution',label:"What were you bringing?",ph:"bringing the speaker and ice"}],
+            build: (v) => `Hey ${v.organiser}, really sorry about the late notice on this, but a few unexpected things came up on my end and I won't be able to handle ${v.contribution} anymore. I'm incredibly sorry to throw a wrench in the plans, but I wanted to tell you all immediately so someone else could claim it or pick it up instead!`
+        }
     };
 
-    const scenario = document.getElementById('scenario');
-    const fields = document.getElementById('fields');
-    const preview = document.getElementById('preview');
-    const copyBtn = document.getElementById('copyBtn');
-
-    function prettyLabel(key){
-      return key.split(/[-_]/).map(s=>s.replace(/^[a-z]/,c=>c.toUpperCase())).join(' ');
+    function loadScenarioFields() {
+        const type = document.getElementById('scenarioSelect').value;
+        document.getElementById('dynamicInputs').innerHTML = templates[type].inputs.map(inp => `
+            <div class="input-box">
+                <label>${inp.label}</label>
+                <input type="text" id="field-${inp.id}" placeholder="${inp.ph}" oninput="liveRenderPreview()">
+            </div>
+        `).join('');
+        liveRenderPreview();
     }
 
-    function populateScenarios(){
-      Object.keys(templates).forEach(key=>{
-        const opt = document.createElement('option');
-        opt.value = key; opt.textContent = prettyLabel(key);
-        scenario.appendChild(opt);
-      });
+    function getValues() {
+        const type = document.getElementById('scenarioSelect').value;
+        let vals = {};
+        templates[type].inputs.forEach(inp => {
+            const el = document.getElementById(`field-${inp.id}`);
+            vals[inp.id] = (el && el.value.trim()) ? el.value.trim() : inp.ph;
+        });
+        return vals;
     }
 
-    function renderFields(){
-      const t = templates[scenario.value];
-      fields.innerHTML = '';
-      t.inputs.forEach(i=>{
-        const wrap = document.createElement('div');
-        wrap.style.marginTop='10px';
-        const lbl = document.createElement('label'); lbl.textContent = i.label; lbl.htmlFor = 'f-'+i.id;
-        const inp = document.createElement('input'); inp.id = 'f-'+i.id; inp.placeholder = i.ph; inp.type='text'; inp.style.marginTop='6px';
-        inp.addEventListener('input',updatePreview);
-        wrap.appendChild(lbl); wrap.appendChild(inp); fields.appendChild(wrap);
-      });
-      updatePreview();
+    function liveRenderPreview() {
+        const type = document.getElementById('scenarioSelect').value;
+        document.getElementById('outputPreview').innerText = templates[type].build(getValues());
     }
 
-    function values(){
-      const t = templates[scenario.value];
-      const vals = {};
-      t.inputs.forEach(i=>{ const el = document.getElementById('f-'+i.id); vals[i.id] = (el && el.value.trim())?el.value.trim():i.ph; });
-      return vals;
+    function generateAndCopyText() {
+        navigator.clipboard.writeText(document.getElementById('outputPreview').innerText).then(() => {
+            const btn = document.querySelector('.btn-main');
+            btn.innerText = "Copied! 👍"; btn.style.backgroundColor = "#10b981";
+            setTimeout(() => { btn.innerText = "Copy to Clipboard"; btn.style.backgroundColor = "var(--primary)"; }, 1500);
+        });
     }
-
-    function updatePreview(){ preview.textContent = templates[scenario.value].build(values()); }
-
-    copyBtn.addEventListener('click',function(){
-      const text = preview.textContent || '';
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(text).then(()=>flashCopied(),()=>fallbackCopy(text));
-      } else fallbackCopy(text);
-    });
-
-    function fallbackCopy(text){
-      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); flashCopied(); }catch(e){ alert('Copy failed — select and copy manually.'); }
-      ta.remove();
-    }
-
-    function flashCopied(){ copyBtn.textContent='Copied!'; copyBtn.style.background='#10b981'; setTimeout(()=>{copyBtn.textContent='Copy to Clipboard'; copyBtn.style.background=''},1200); }
-
-    scenario.addEventListener('change',renderFields);
-    populateScenarios(); scenario.value='payment-request'; renderFields();
-  })();
-  </script>
+    loadScenarioFields();
+</script>
 </body>
 </html>
