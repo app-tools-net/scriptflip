@@ -32,7 +32,7 @@
       <h1>✍️ ScriptFlip</h1>
       <div>
         <label for="scenario">Choose a template</label>
-        <select id="scenario"></select>
+        <select id="scenario" aria-label="Template selector"></select>
         <div class="meta">Templates include tone variants and are built from descriptive slugs.</div>
       </div>
 
@@ -45,7 +45,7 @@
       <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px">
         <div style="flex:1">
           <label class="small">Tone</label>
-          <select id="toneSelect" style="min-width:140px;margin-top:6px"></select>
+          <select id="toneSelect" style="min-width:140px;margin-top:6px" aria-label="Tone selector"></select>
         </div>
       </div>
 
@@ -64,166 +64,201 @@
 
   <script>
   (function(){
-    const templates = {
-      "payment-request-polite-reminder":{
-        title: "Payment Reminder — Polite",
-        description: "A gentle reminder to a friend or acquaintance about an outstanding payment.",
-        tags:["payment","reminder","friend"],
-        tones:["polite","firm"],
-        inputs:[
-          {id:'recipient_name',label:"Recipient's name",ph:'Chris'},
-          {id:'amount',label:'Amount owed (USD)',ph:'25'},
-          {id:'reason',label:'Reason / context',ph:'concert tickets'},
-          {id:'deadline',label:'Optional friendly deadline',ph:'end of the week (no rush)'}
-        ],
-        build:function(v,tone){
-          const when = v.deadline? ` by ${v.deadline}` : '';
-          if(tone==='firm'){
-            return `Hi ${v.recipient_name},\n\nI'm following up about the $${v.amount} for ${v.reason}. Please let me know when you can transfer it${when}. If it's easier I can share payment details again.\n\nThanks.`;
+    // Wrap the whole init in try/catch and surface errors to preview/console to help debugging
+    function showError(err){
+      console.error(err);
+      try{ document.getElementById('preview').textContent = 'Initialization error: ' + (err && err.message ? err.message : String(err)); }catch(e){}
+    }
+
+    try{
+      const templates = {
+        "payment-request-polite-reminder":{
+          title: "Payment Reminder — Polite",
+          description: "A gentle reminder to a friend or acquaintance about an outstanding payment.",
+          tags:["payment","reminder","friend"],
+          tones:["polite","firm"],
+          inputs:[
+            {id:'recipient_name',label:"Recipient's name",ph:'Chris'},
+            {id:'amount',label:'Amount owed (USD)',ph:'25'},
+            {id:'reason',label:'Reason / context',ph:'concert tickets'},
+            {id:'deadline',label:'Optional friendly deadline',ph:'end of the week (no rush)'}
+          ],
+          build:function(v,tone){
+            const when = v.deadline? ' by ' + v.deadline : '';
+            if(tone==='firm'){
+              return 'Hi ' + v.recipient_name + '\n\n' +
+                "I'm following up about the $" + v.amount + ' for ' + v.reason + '. Please let me know when you can transfer it' + when + ". If it's easier I can share payment details again.\n\nThanks.";
+            }
+            return 'Hey ' + v.recipient_name + ', hope you\'re well. Quick question — did you get a chance to send the $' + v.amount + ' for ' + v.reason + '? No rush' + when + '. Thanks!';
           }
-          return `Hey ${v.recipient_name}, hope you're well. Quick question — did you get a chance to send the $${v.amount} for ${v.reason}? No rush${when}. Thanks!`;
+        },
+
+        "decline-invitation-regrets":{
+          title:"Decline Invitation — Regretful",
+          description:"A short, gracious decline for social invitations when you can't attend.",
+          tags:["decline","invitation","social"],
+          tones:["friendly","formal"],
+          inputs:[{id:'host',label:"Host's name",ph:'Sarah'},{id:'occasion',label:'Occasion',ph:'birthday dinner on Friday'}],
+          build:function(v,tone){
+            if(tone==='formal') return 'Dear ' + v.host + '\n\nThank you very much for the invitation to ' + v.occasion + '. I regret I will be unable to attend. I hope the event is a success and wish you a wonderful time.\n\nSincerely.';
+            return 'Hi ' + v.host + ', thanks so much for inviting me to ' + v.occasion + '. It sounds lovely, but I won\'t be able to make it this time. I hope you have a wonderful time!';
+          }
+        },
+
+        "noise-complaint-neighbor":{
+          title:"Noise Complaint — Neighbor Notice",
+          description:"A polite note to a neighbor describing an unwanted noise and when it occurred.",
+          tags:["neighbor","noise","housing"],
+          tones:["polite","direct"],
+          inputs:[{id:'time',label:'When did it happen?',ph:'last night around 11pm'},{id:'sound',label:'Describe the sound',ph:'loud bass from music'},{id:'impact',label:'How it affected you',ph:'made it hard to sleep'}],
+          build:function(v,tone){
+            if(tone==='direct') return 'Hi — this is to let you know that ' + v.sound + ' was audible in my flat ' + v.time + '. It ' + v.impact + '. Please keep an eye on the volume in future. Thanks.';
+            return 'Hi neighbor — hope you\'re well. Just wanted to let you know that ' + v.sound + ' came through my walls ' + v.time + ' and it ' + v.impact + '. I thought you might want to know in case you\'re not aware. Thanks for understanding.';
+          }
+        },
+
+        "cancel-plans-apology-reschedule":{
+          title:"Cancel Plans — Apology & Reschedule",
+          description:"Cancelling plans with an apology and an offer to reschedule.",
+          tags:["cancel","plans","friend"],
+          tones:["sincere"],
+          inputs:[{id:'friend',label:"Friend's name",ph:'Alex'},{id:'plans',label:'What plan are you cancelling?',ph:'our lunch catch up today'},{id:'suggest',label:'Optional reschedule suggestion',ph:'sometime next week?'}],
+          build:function(v){
+            return 'Hey ' + v.friend + ', I\'m really sorry but I need to cancel ' + v.plans + ' — I\'m not feeling up to it today. ' + (v.suggest ? ('I\'m happy to reschedule: ' + v.suggest + '.') : '') + ' Sorry again.';
+          }
+        },
+
+        "resignation-short-notice":{
+          title:"Resignation — Short Formal Notice",
+          description:"A concise resignation notice with a stated last day.",
+          tags:["resignation","work","formal"],
+          tones:["formal"],
+          inputs:[{id:'manager',label:'Manager / supervisor name',ph:'Terry'},{id:'position',label:'Your role',ph:'evening assistant'},{id:'last_day',label:'Last day (date)',ph:'Friday 23rd'}],
+          build:function(v){
+            return 'Hi ' + v.manager + '\n\nPlease accept this as my resignation from the position of ' + v.position + ', with my last day being ' + v.last_day + '. Thank you for the opportunity and support during my time here.';
+          }
+        },
+
+        "subscription-cancellation-business-letter":{
+          title:"Subscription Cancellation — Business",
+          description:"A formal cancellation request for a subscription or membership tied to an account ID.",
+          tags:["subscription","business","cancellation"],
+          tones:["formal"],
+          inputs:[{id:'company',label:'Company / service name',ph:'Aura Fitness'},{id:'account',label:'Account or member ID',ph:'MEM-8849'},{id:'effective',label:'Effective date',ph:'immediately'}],
+          build:function(v){
+            return 'To whom it may concern at ' + v.company + ',\n\nPlease cancel my subscription associated with account ' + v.account + ', effective ' + v.effective + '. Please confirm once processed.\n\nThank you.';
+          }
+        },
+
+        "borrowed-item-return-request":{
+          title:"Return Borrowed Item — Request",
+          description:"A friendly note to request return of something you lent to someone.",
+          tags:["borrowed","return","friend"],
+          tones:["friendly","casual"],
+          inputs:[{id:'recipient',label:"Recipient's name",ph:'Jordan'},{id:'item',label:'The borrowed item',ph:'camping tent'},{id:'when',label:'When you'd like it back',ph:'this weekend'}],
+          build:function(v,tone){
+            if(tone==='casual') return 'Hey ' + v.recipient + ', quick Q — could I grab ' + v.item + ' back ' + v.when + '? Thanks!';
+            return 'Hey ' + v.recipient + ', hope you\'re well. I\'m sorting things this weekend and realized I need ' + v.item + ' back. Could I pick it up or would you like to drop it off? Thanks!';
+          }
+        },
+
+        "date-followup-polite-decline":{
+          title:"Date Follow-up — Polite Decline",
+          description:"A gentle message to let someone know you didn't feel a romantic connection after a date.",
+          tags:["dating","follow-up","polite"],
+          tones:["polite","direct"],
+          inputs:[{id:'name',label:"Person's name",ph:'Taylor'},{id:'activity',label:'Activity (what you did)',ph:'getting drinks last night'}],
+          build:function(v,tone){
+            if(tone==='direct') return 'Hi ' + v.name + ', thanks for ' + v.activity + '. I don\'t feel we\'re a romantic match, but I wish you all the best.';
+            return 'Hey ' + v.name + ', thanks again for ' + v.activity + '. I enjoyed meeting you, but I didn\'t feel a strong romantic connection. Wishing you all the best.';
+          }
         }
-      },
+      };
 
-      "decline-invitation-regrets":{
-        title:"Decline Invitation — Regretful",
-        description:"A short, gracious decline for social invitations when you can't attend.",
-        tags:["decline","invitation","social"],
-        tones:["friendly","formal"],
-        inputs:[{id:'host',label:"Host's name",ph:'Sarah'},{id:'occasion',label:'Occasion',ph:'birthday dinner on Friday'}],
-        build:(v,tone)=>{
-          if(tone==='formal') return `Dear ${v.host},\n\nThank you very much for the invitation to ${v.occasion}. I regret I will be unable to attend. I hope the event is a success and wish you a wonderful time.\n\nSincerely.`;
-          return `Hi ${v.host}, thanks so much for inviting me to ${v.occasion}. It sounds lovely, but I won't be able to make it this time. I hope you have a wonderful time!`;
-        }
-      },
+      const scenario = document.getElementById('scenario');
+      const tplTitle = document.getElementById('tplTitle');
+      const tplDesc = document.getElementById('tplDesc');
+      const tplTags = document.getElementById('tplTags');
+      const fields = document.getElementById('fields');
+      const preview = document.getElementById('preview');
+      const toneSelect = document.getElementById('toneSelect');
 
-      "noise-complaint-neighbor":{
-        title:"Noise Complaint — Neighbor Notice",
-        description:"A polite note to a neighbor describing an unwanted noise and when it occurred.",
-        tags:["neighbor","noise","housing"],
-        tones:["polite","direct"],
-        inputs:[{id:'time',label:'When did it happen?',ph:'last night around 11pm'},{id:'sound',label:'Describe the sound',ph:'loud bass from music'},{id:'impact',label:'How it affected you',ph:'made it hard to sleep'}],
-        build:(v,tone)=>{
-          if(tone==='direct') return `Hi — this is to let you know that ${v.sound} was audible in my flat ${v.time}. It ${v.impact}. Please keep an eye on the volume in future. Thanks.`;
-          return `Hi neighbor — hope you're well. Just wanted to let you know that ${v.sound} came through my walls ${v.time} and it ${v.impact}. I thought you might want to know in case you're not aware. Thanks for understanding.`;
-        }
-      },
-
-      "cancel-plans-apology-reschedule":{
-        title:"Cancel Plans — Apology & Reschedule",
-        description:"Cancelling plans with an apology and an offer to reschedule.",
-        tags:["cancel","plans","friend"],
-        tones:["sincere"],
-        inputs:[{id:'friend',label:"Friend's name",ph:'Alex'},{id:'plans',label:'What plan are you cancelling?',ph:'our lunch catch up today'},{id:'suggest',label:'Optional reschedule suggestion',ph:'sometime next week?'}],
-        build:(v)=>`Hey ${v.friend}, I'm really sorry but I need to cancel ${v.plans} — I'm not feeling up to it today. ${v.suggest? 'I'm happy to reschedule: ' + v.suggest + '.' : ''} Sorry again.`
-      },
-
-      "resignation-short-notice":{
-        title:"Resignation — Short Formal Notice",
-        description:"A concise resignation notice with a stated last day.",
-        tags:["resignation","work","formal"],
-        tones:["formal"],
-        inputs:[{id:'manager',label:'Manager / supervisor name',ph:'Terry'},{id:'position',label:'Your role',ph:'evening assistant'},{id:'last_day',label:'Last day (date)',ph:'Friday 23rd'}],
-        build:(v)=>`Hi ${v.manager},\n\nPlease accept this as my resignation from the position of ${v.position}, with my last day being ${v.last_day}. Thank you for the opportunity and support during my time here.`
-      },
-
-      "subscription-cancellation-business-letter":{
-        title:"Subscription Cancellation — Business",
-        description:"A formal cancellation request for a subscription or membership tied to an account ID.",
-        tags:["subscription","business","cancellation"],
-        tones:["formal"],
-        inputs:[{id:'company',label:'Company / service name',ph:'Aura Fitness'},{id:'account',label:'Account or member ID',ph:'MEM-8849'},{id:'effective',label:'Effective date',ph:'immediately'}],
-        build:(v)=>`To whom it may concern at ${v.company},\n\nPlease cancel my subscription associated with account ${v.account}, effective ${v.effective}. Please confirm once processed.\n\nThank you.`
-      },
-
-      "borrowed-item-return-request":{
-        title:"Return Borrowed Item — Request",
-        description:"A friendly note to request return of something you lent to someone.",
-        tags:["borrowed","return","friend"],
-        tones:["friendly","casual"],
-        inputs:[{id:'recipient',label:"Recipient's name",ph:'Jordan'},{id:'item',label:'The borrowed item',ph:'camping tent'},{id:'when',label:'When you'd like it back',ph:'this weekend'}],
-        build:(v,tone)=>{
-          if(tone==='casual') return `Hey ${v.recipient}, quick Q — could I grab ${v.item} back ${v.when}? Thanks!`;
-          return `Hey ${v.recipient}, hope you're well. I'm sorting things this weekend and realized I need ${v.item} back. Could I pick it up or would you like to drop it off? Thanks!`;
-        }
-      },
-
-      "date-followup-polite-decline":{
-        title:"Date Follow-up — Polite Decline",
-        description:"A gentle message to let someone know you didn't feel a romantic connection after a date.",
-        tags:["dating","follow-up","polite"],
-        tones:["polite","direct"],
-        inputs:[{id:'name',label:"Person's name",ph:'Taylor'},{id:'activity',label:'Activity (what you did)',ph:'getting drinks last night'}],
-        build:(v,tone)=>{
-          if(tone==='direct') return `Hi ${v.name}, thanks for ${v.activity}. I don't feel we're a romantic match, but I wish you all the best.`;
-          return `Hey ${v.name}, thanks again for ${v.activity}. I enjoyed meeting you, but I didn't feel a strong romantic connection. Wishing you all the best.`;
-        }
+      function prettyLabel(key){
+        return (templates[key].title) || key.split(/[-_]/).map(s=>s.replace(/^[a-z]/,c=>c.toUpperCase())).join(' ');
       }
-    };
 
-    const scenario = document.getElementById('scenario');
-    const tplTitle = document.getElementById('tplTitle');
-    const tplDesc = document.getElementById('tplDesc');
-    const tplTags = document.getElementById('tplTags');
-    const fields = document.getElementById('fields');
-    const preview = document.getElementById('preview');
-    const toneSelect = document.getElementById('toneSelect');
+      function populateScenarios(){
+        // defensive: clear existing options and add a placeholder
+        scenario.innerHTML = '';
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '-- select a template --';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        scenario.appendChild(placeholder);
 
-    function prettyLabel(key){
-      return (templates[key].title) || key.split(/[-_]/).map(s=>s.replace(/^[a-z]/,c=>c.toUpperCase())).join(' ');
-    }
+        const keys = Object.keys(templates);
+        keys.forEach(key=>{
+          const opt = document.createElement('option');
+          opt.value = key; opt.textContent = prettyLabel(key);
+          scenario.appendChild(opt);
+        });
 
-    function populateScenarios(){
-      Object.keys(templates).forEach(key=>{
-        const opt = document.createElement('option');
-        opt.value = key; opt.textContent = prettyLabel(key);
-        scenario.appendChild(opt);
-      });
-      scenario.value = Object.keys(templates)[0];
-    }
+        // if there is at least one template, select the first real one
+        if(keys.length) scenario.value = keys[0];
+      }
 
-    function renderFields(){
-      const t = templates[scenario.value];
-      tplTitle.textContent = t.title || prettyLabel(scenario.value);
-      tplDesc.textContent = t.description || '';
-      tplTags.innerHTML = (t.tags||[]).map(x=>`<span class="tag">${x}</span>`).join('');
+      function renderFields(){
+        const t = templates[scenario.value];
+        if(!t) return; // guard
+        tplTitle.textContent = t.title || prettyLabel(scenario.value);
+        tplDesc.textContent = t.description || '';
+        tplTags.innerHTML = (t.tags||[]).map(x=>`<span class="tag">${x}</span>`).join('');
 
-      // tone options
-      toneSelect.innerHTML = '';
-      (t.tones || ['default']).forEach(tt=>{ const o=document.createElement('option'); o.value=tt; o.textContent = tt[0].toUpperCase()+tt.slice(1); toneSelect.appendChild(o); });
+        // tone options
+        toneSelect.innerHTML = '';
+        (t.tones || ['default']).forEach(tt=>{ const o=document.createElement('option'); o.value=tt; o.textContent = tt[0].toUpperCase()+tt.slice(1); toneSelect.appendChild(o); });
 
-      fields.innerHTML = '';
-      (t.inputs||[]).forEach(i=>{
-        const wrap = document.createElement('div'); wrap.style.marginTop='10px';
-        const lbl = document.createElement('label'); lbl.textContent = i.label; lbl.htmlFor = 'f-'+i.id;
-        const inp = (i.type==='textarea')? document.createElement('textarea') : document.createElement('input');
-        if(i.type==='textarea') inp.rows=3; else inp.type='text';
-        inp.id='f-'+i.id; inp.placeholder = i.ph || ''; inp.style.marginTop='6px';
-        inp.addEventListener('input',updatePreview);
-        wrap.appendChild(lbl); wrap.appendChild(inp); fields.appendChild(wrap);
-      });
-      updatePreview();
-    }
+        fields.innerHTML = '';
+        (t.inputs||[]).forEach(i=>{
+          const wrap = document.createElement('div'); wrap.style.marginTop='10px';
+          const lbl = document.createElement('label'); lbl.textContent = i.label; lbl.htmlFor = 'f-'+i.id;
+          const inp = (i.type==='textarea')? document.createElement('textarea') : document.createElement('input');
+          if(i.type==='textarea') inp.rows=3; else inp.type='text';
+          inp.id='f-'+i.id; inp.placeholder = i.ph || ''; inp.style.marginTop='6px';
+          inp.addEventListener('input',updatePreview);
+          wrap.appendChild(lbl); wrap.appendChild(inp); fields.appendChild(wrap);
+        });
+        updatePreview();
+      }
 
-    function values(){
-      const t = templates[scenario.value]; const vals={};
-      (t.inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); vals[i.id] = (el && el.value.trim())? el.value.trim() : (i.ph || ''); });
-      return vals;
-    }
+      function values(){
+        const t = templates[scenario.value]; const vals={};
+        (t.inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); vals[i.id] = (el && el.value.trim())? el.value.trim() : (i.ph || ''); });
+        return vals;
+      }
 
-    function updatePreview(){ preview.textContent = templates[scenario.value].build(values(), toneSelect.value || ''); }
+      function updatePreview(){
+        try{
+          const tpl = templates[scenario.value]; if(!tpl) { preview.textContent = 'No template selected'; return; }
+          preview.textContent = (typeof tpl.build === 'function') ? tpl.build(values(), toneSelect.value || '') : (tpl.build || '');
+        }catch(err){ showError(err); }
+      }
 
-    document.getElementById('generateBtn').addEventListener('click',updatePreview);
-    document.getElementById('copyBtn').addEventListener('click',function(){ const text = preview.textContent || ''; if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>flash('Copied!'),()=>fallbackCopy(text)); } else fallbackCopy(text); });
-    document.getElementById('resetBtn').addEventListener('click',function(){ const t = templates[scenario.value]; (t.inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); if(el) el.value=''; }); updatePreview(); });
+      document.getElementById('generateBtn').addEventListener('click',updatePreview);
+      document.getElementById('copyBtn').addEventListener('click',function(){ const text = preview.textContent || ''; if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>flash('Copied!'),()=>fallbackCopy(text)); } else fallbackCopy(text); });
+      document.getElementById('resetBtn').addEventListener('click',function(){ const t = templates[scenario.value]; (t.inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); if(el) el.value=''; }); updatePreview(); });
 
-    function fallbackCopy(text){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); flash('Copied!'); }catch(e){ alert('Copy failed — select and copy manually.'); } ta.remove(); }
-    function flash(msg){ const btn=document.getElementById('copyBtn'); const prev=btn.textContent; btn.textContent=msg; btn.style.background='var(--accent)'; setTimeout(()=>{ btn.textContent=prev; btn.style.background=''; },1200); }
+      function fallbackCopy(text){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); flash('Copied!'); }catch(e){ alert('Copy failed — select and copy manually.'); } ta.remove(); }
+      function flash(msg){ const btn=document.getElementById('copyBtn'); const prev=btn.textContent; btn.textContent=msg; btn.style.background='var(--accent)'; setTimeout(()=>{ btn.textContent=prev; btn.style.background=''; },1200); }
 
-    scenario.addEventListener('change',renderFields);
-    toneSelect.addEventListener('change',updatePreview);
+      scenario.addEventListener('change',renderFields);
+      toneSelect.addEventListener('change',updatePreview);
 
-    populateScenarios(); renderFields();
+      // initialize
+      populateScenarios(); renderFields();
+
+    }catch(e){ showError(e); }
   })();
   </script>
 </body>
