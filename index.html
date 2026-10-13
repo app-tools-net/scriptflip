@@ -5,141 +5,279 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>ScriptFlip | Fill-in-the-Blanks Message Generator</title>
   <meta name="description" content="ScriptFlip helps you write polite, stress-free messages for awkward life situations.">
-  <meta name="keywords" content="message generator, polite message generator, awkward situation text generator, decline invitation message, cancel plans message, asking for money message, subscription cancellation, return borrowed item, resignation letter, noisy neighbor">
+  <meta name="keywords" content="message generator, polite message generator, awkward situation text generator, decline invitation message, cancel plans message">
   <style>
-    :root{--bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--border:#e2e8f0;--r:14px}
+    :root{--bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--accent:#10b981;--border:#e2e8f0;--r:14px}
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;}
-    .wrap{width:100%;max-width:520px;margin:28px auto;padding:18px}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 4px 10px rgba(2,6,23,0.04)}
+    body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center}
+    .wrap{width:100%;max-width:760px;margin:28px auto;padding:18px}
+    .grid{display:grid;grid-template-columns:1fr 2fr;gap:16px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
     h1{color:var(--primary);font-size:1.25rem;margin-bottom:12px}
     label{font-size:0.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-    select,input{width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);background:#fafafa}
+    select,input,textarea{width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);background:#fafafa}
     .btn{display:inline-block;background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
-    .out{background:#f1f5f9;border-radius:10px;padding:12px;margin-top:12px;min-height:76px;border:1px solid var(--border);white-space:pre-wrap}
+    .btn-ghost{background:transparent;color:var(--primary);border:1px solid var(--border)}
+    .out{background:#f1f5f9;border-radius:10px;padding:12px;margin-top:12px;min-height:120px;border:1px solid var(--border);white-space:pre-wrap}
+    .meta{font-size:12px;color:var(--muted);margin-top:6px}
+    .tag{display:inline-block;background:#eef2ff;color:var(--primary);padding:6px 8px;border-radius:999px;margin-right:6px;font-size:12px}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .templates-list{max-height:360px;overflow:auto}
+    .tpl-item{padding:10px;border-radius:8px;border:1px solid transparent;cursor:pointer}
+    .tpl-item:hover{background:#fbfdff}
+    .tpl-item.active{border-color:var(--primary);background:#f8f7ff}
+    .small{font-size:13px;color:var(--muted)}
     footer{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
-    @media (max-width:420px){.wrap{padding:12px}}
+    @media (max-width:780px){.grid{grid-template-columns:1fr;}.wrap{padding:12px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
-      <h1>✍️ ScriptFlip</h1>
-      <div>
-        <label for="scenario">Select your situation</label>
-        <select id="scenario"></select>
+    <h1>✍️ ScriptFlip</h1>
+    <div class="grid">
+      <div class="card templates-list" id="templatesCard">
+        <label for="scenarioSearch">Find a template</label>
+        <input id="scenarioSearch" placeholder="Search by name, tag, or purpose" />
+        <div class="meta">Tip: try "payment", "cancel", "roommate", or "resignation"</div>
+        <div id="templates" style="margin-top:10px"></div>
       </div>
-      <div id="fields"></div>
-      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-        <button id="copyBtn" class="btn">Copy to Clipboard</button>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+          <div>
+            <div id="tplTitle" style="font-weight:800;font-size:1rem">Loading…</div>
+            <div id="tplDesc" class="meta">Choose a template to see details.</div>
+            <div id="tplTags" style="margin-top:8px"></div>
+          </div>
+          <div style="text-align:right">
+            <label class="small">Tone</label>
+            <select id="toneSelect" style="min-width:140px;margin-top:6px"></select>
+          </div>
+        </div>
+
+        <div id="fields" style="margin-top:12px"></div>
+
+        <div class="controls">
+          <button id="generateBtn" class="btn">Generate</button>
+          <button id="copyBtn" class="btn btn-ghost">Copy</button>
+          <button id="resetBtn" class="btn btn-ghost">Reset</button>
+        </div>
+
+        <div id="preview" class="out">Your generated message will appear here.</div>
       </div>
-      <div id="preview" class="out">Loading…</div>
     </div>
-    <footer>Privacy-first. No network calls; everything runs in your browser.</footer>
+
+    <footer>Privacy-first. Everything runs in your browser — no network calls.</footer>
   </div>
 
   <script>
   (function(){
+    // Templates now include more explicit slugs, titles, descriptions, tags and tone variants.
     const templates = {
-      "payment-request":{
-        inputs:[{id:'name',label:"Friend's name",ph:'Chris'},{id:'amount',label:'Amount owed ($)',ph:'25'},{id:'event',label:'What was it for?',ph:'concert tickets'}],
-        build:v=>`Hey ${v.name}, hope you're well. Quick one — did you get a chance to send the $${v.amount} for ${v.event}? No rush, just checking in as I'm sorting my budget. Thanks!`
+      // Payment reminder with polite and firm tones
+      "payment-request-polite-reminder":{
+        title: "Payment Reminder — Polite",
+        description: "A gentle reminder to a friend or acquaintance about an outstanding payment.",
+        tags:["payment","reminder","friend"],
+        tones:["polite","firm"],
+        inputs:[
+          {id:'recipient_name',label:"Recipient's name",ph:'Chris'},
+          {id:'amount',label:'Amount owed (USD)',ph:'25'},
+          {id:'reason',label:'Reason / context',ph:'concert tickets'},
+          {id:'deadline',label:'Optional friendly deadline',ph:'end of the week (no rush)'}
+        ],
+        build:function(v,tone){
+          const when = v.deadline? ` by ${v.deadline}` : '';
+          if(tone==='firm'){
+            return `Hi ${v.recipient_name},\n\nI'm following up about the $${v.amount} for ${v.reason}. Please let me know when you can transfer it${when}. If it's easier I can share payment details again.\n\nThanks.`;
+          }
+          return `Hey ${v.recipient_name}, hope you're well. Quick question — did you get a chance to send the $${v.amount} for ${v.reason}? No rush${when}. Thanks!`;
+        }
       },
-      decline:{
-        inputs:[{id:'name',label:"Person's name",ph:'Sarah'},{id:'event',label:'What is the event?',ph:'the birthday dinner on Friday'}],
-        build:v=>`Hi ${v.name}, thanks so much for inviting me to ${v.event}. It sounds lovely, but I won't be able to make it this time. I hope you have a wonderful time!`
+
+      "decline-invitation-regrets":{
+        title:"Decline Invitation — Regretful",
+        description:"A short, gracious decline for social invitations when you can't attend.",
+        tags:["decline","invitation","social"],
+        tones:["friendly","formal"],
+        inputs:[{id:'host',label:"Host's name",ph:'Sarah'},{id:'occasion',label:'Occasion',ph:'birthday dinner on Friday'}],
+        build:(v,tone)=>{
+          if(tone==='formal') return `Dear ${v.host},\n\nThank you very much for the invitation to ${v.occasion}. I regret I will be unable to attend. I hope the event is a success and wish you a wonderful time.\n\nSincerely.`;
+          return `Hi ${v.host}, thanks so much for inviting me to ${v.occasion}. It sounds lovely, but I won't be able to make it this time. I hope you have a wonderful time!`;
+        }
       },
-      noise:{
-        inputs:[{id:'time',label:'When did the noise happen?',ph:'last night around 11pm'},{id:'sound',label:'What was the sound?',ph:'loud bass from music'}],
-        build:v=>`Hi neighbor — hope you're well. Just letting you know that ${v.sound} came through my walls ${v.time}. I wanted to mention it in case you're not aware. Thanks for understanding.`
+
+      "noise-complaint-neighbor":{
+        title:"Noise Complaint — Neighbor Notice",
+        description:"A polite note to a neighbor describing an unwanted noise and when it occurred.",
+        tags:["neighbor","noise","housing"],
+        tones:["polite","direct"],
+        inputs:[{id:'time',label:'When did it happen?',ph:'last night around 11pm'},{id:'sound',label:'Describe the sound',ph:'loud bass from music'},{id:'impact',label:'How it affected you',ph:'made it hard to sleep'}],
+        build:(v,tone)=>{
+          if(tone==='direct') return `Hi — this is to let you know that ${v.sound} was audible in my flat ${v.time}. It ${v.impact}. Please keep an eye on the volume in future. Thanks.`;
+          return `Hi neighbor — hope you're well. Just wanted to let you know that ${v.sound} came through my walls ${v.time} and it ${v.impact}. I thought you might want to know in case you're not aware. Thanks for understanding.`;
+        }
       },
-      cancel:{
-        inputs:[{id:'name',label:"Friend's name",ph:'Alex'},{id:'event',label:'What plan are you cancelling?',ph:'our lunch catch up today'}],
-        build:v=>`Hey ${v.name}, I'm really sorry but I need to cancel ${v.event} — I'm not feeling up to it today. I'm happy to reschedule when things calm down. Sorry again.`
+
+      "cancel-plans-apology-reschedule":{
+        title:"Cancel Plans — Apology & Reschedule",
+        description:"Cancelling plans with an apology and an offer to reschedule.",
+        tags:["cancel","plans","friend"],
+        tones:["sincere"],
+        inputs:[{id:'friend',label:"Friend's name",ph:'Alex'},{id:'plans',label:'What plan are you cancelling?',ph:'our lunch catch up today'},{id:'suggest',label:'Optional reschedule suggestion',ph:'sometime next week?'}],
+        build:(v)=>`Hey ${v.friend}, I'm really sorry but I need to cancel ${v.plans} — I'm not feeling up to it today. ${v.suggest? 'I'm happy to reschedule: ' + v.suggest + '.' : ''} Sorry again.`
       },
-      sick:{
-        inputs:[{id:'boss',label:'Manager / boss name',ph:'Terry'},{id:'coverage',label:'Coverage note',ph:'Emily will cover my tickets'}],
-        build:v=>`Hi ${v.boss}, I'm unwell today and won't be able to work. I'll rest and aim to be back tomorrow. ${v.coverage ? 'Note: ' + v.coverage + '.' : ''}`
+
+      "resignation-short-notice":{
+        title:"Resignation — Short Formal Notice",
+        description:"A concise resignation notice with a stated last day.",
+        tags:["resignation","work","formal"],
+        tones:["formal"],
+        inputs:[{id:'manager',label:'Manager / supervisor name',ph:'Terry'},{id:'position',label:'Your role',ph:'evening assistant'},{id:'last_day',label:'Last day (date)',ph:'Friday 23rd'}],
+        build:(v)=>`Hi ${v.manager},\n\nPlease accept this as my resignation from the position of ${v.position}, with my last day being ${v.last_day}. Thank you for the opportunity and support during my time here.`
       },
-      sub:{
-        inputs:[{id:'company',label:'Business / gym name',ph:'Aura Fitness'},{id:'id',label:'Account / member ID',ph:'MEM-8849'}],
-        build:v=>`To whom it may concern at ${v.company},\n\nPlease cancel my subscription associated with ID ${v.id}, effective immediately. Please confirm once processed.\n\nThank you.`
+
+      "subscription-cancellation-business-letter":{
+        title:"Subscription Cancellation — Business",
+        description:"A formal cancellation request for a subscription or membership tied to an account ID.",
+        tags:["subscription","business","cancellation"],
+        tones:["formal"],
+        inputs:[{id:'company',label:'Company / service name',ph:'Aura Fitness'},{id:'account',label:'Account or member ID',ph:'MEM-8849'},{id:'effective',label:'Effective date',ph:'immediately'}],
+        build:(v)=>`To whom it may concern at ${v.company},\n\nPlease cancel my subscription associated with account ${v.account}, effective ${v.effective}. Please confirm once processed.\n\nThank you.`
       },
-      return:{
-        inputs:[{id:'name',label:"Friend's name",ph:'Jordan'},{id:'item',label:'Borrowed item',ph:'camping tent'}],
-        build:v=>`Hey ${v.name}, hope you're well. I'm sorting things this weekend and realized I need ${v.item} back. Could I pick it up or would you like to drop it off? Thanks!`
+
+      "borrowed-item-return-request":{
+        title:"Return Borrowed Item — Request",
+        description:"A friendly note to request return of something you lent to someone.",
+        tags:["borrowed","return","friend"],
+        tones:["friendly","casual"],
+        inputs:[{id:'recipient',label:"Recipient's name",ph:'Jordan'},{id:'item',label:'The borrowed item',ph:'camping tent'},{id:'when',label:'When you'd like it back',ph:'this weekend'}],
+        build:(v,tone)=>{
+          if(tone==='casual') return `Hey ${v.recipient}, quick Q — could I grab ${v.item} back ${v.when}? Thanks!`;
+          return `Hey ${v.recipient}, hope you're well. I'm sorting things this weekend and realized I need ${v.item} back. Could I pick it up or would you like to drop it off? Thanks!`;
+        }
       },
-      date:{
-        inputs:[{id:'name',label:"Date's name",ph:'Taylor'},{id:'activity',label:'What did you do?',ph:'getting drinks last night'}],
-        build:v=>`Hey ${v.name}, thanks again for ${v.activity}. I enjoyed meeting you, but I didn't feel a strong romantic connection. Wishing you all the best.`
-      },
-      quit:{
-        inputs:[{id:'manager',label:'Manager name',ph:'Dave'},{id:'role',label:'Your position',ph:'evening assistant'},{id:'date',label:'Last day',ph:'Friday the 23rd'}],
-        build:v=>`Hi ${v.manager},\n\nPlease accept this as my resignation from the position of ${v.role}, with my last day being ${v.date}. Thank you for the opportunity.`
-      },
-      backingout:{
-        inputs:[{id:'organiser',label:'Organiser / group',ph:'the picnic group chat'},{id:'contribution',label:'What were you bringing?',ph:'speaker and ice'}],
-        build:v=>`Hey ${v.organiser}, sorry for the late notice, but I can't handle ${v.contribution} anymore due to unexpected issues. I'm really sorry — happy to help find a replacement.`
+
+      "date-followup-polite-decline":{
+        title:"Date Follow-up — Polite Decline",
+        description:"A gentle message to let someone know you didn't feel a romantic connection after a date.",
+        tags:["dating","follow-up","polite"],
+        tones:["polite","direct"],
+        inputs:[{id:'name',label:"Person's name",ph:'Taylor'},{id:'activity',label:'Activity (what you did)',ph:'getting drinks last night'}],
+        build:(v,tone)=>{
+          if(tone==='direct') return `Hi ${v.name}, thanks for ${v.activity}. I don't feel we're a romantic match, but I wish you all the best.`;
+          return `Hey ${v.name}, thanks again for ${v.activity}. I enjoyed meeting you, but I didn't feel a strong romantic connection. Wishing you all the best.`;
+        }
       }
     };
 
-    const scenario = document.getElementById('scenario');
+    // Keep an index of template keys for search
+    const tplKeys = Object.keys(templates);
+
+    // Elements
+    const templatesEl = document.getElementById('templates');
+    const tplTitle = document.getElementById('tplTitle');
+    const tplDesc = document.getElementById('tplDesc');
+    const tplTags = document.getElementById('tplTags');
     const fields = document.getElementById('fields');
     const preview = document.getElementById('preview');
-    const copyBtn = document.getElementById('copyBtn');
+    const toneSelect = document.getElementById('toneSelect');
+    const scenarioSearch = document.getElementById('scenarioSearch');
 
-    function prettyLabel(key){
-      return key.split(/[-_]/).map(s=>s.replace(/^[a-z]/,c=>c.toUpperCase())).join(' ');
+    let activeKey = tplKeys[0];
+
+    function prettyLabel(slug){
+      // Convert slug to readable title if no explicit title
+      return (templates[slug].title) || slug.split(/[-_]/).map(s=>s[0].toUpperCase()+s.slice(1)).join(' ');
     }
 
-    function populateScenarios(){
-      Object.keys(templates).forEach(key=>{
-        const opt = document.createElement('option');
-        opt.value = key; opt.textContent = prettyLabel(key);
-        scenario.appendChild(opt);
+    function renderTemplates(filter){
+      templatesEl.innerHTML = '';
+      const q = (filter||'').toLowerCase().trim();
+      tplKeys.forEach(k=>{
+        const tpl = templates[k];
+        const matches = !q || [k,tpl.title,(tpl.description||''), (tpl.tags||[]).join(' ')].join(' ').toLowerCase().includes(q);
+        if(!matches) return;
+        const div = document.createElement('div');
+        div.className = 'tpl-item' + (k===activeKey? ' active':'');
+        div.innerHTML = `<div style="font-weight:700">${prettyLabel(k)}</div><div class="small">${tpl.description || ''}</div>`;
+        div.addEventListener('click',()=>{ activeKey = k; renderActiveTemplate(); renderTemplates(scenarioSearch.value); });
+        templatesEl.appendChild(div);
       });
     }
 
-    function renderFields(){
-      const t = templates[scenario.value];
+    function renderActiveTemplate(){
+      const tpl = templates[activeKey];
+      tplTitle.textContent = tpl.title || prettyLabel(activeKey);
+      tplDesc.textContent = tpl.description || '';
+      tplTags.innerHTML = (tpl.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
+
+      // tone options
+      toneSelect.innerHTML = '';
+      (tpl.tones || ['default']).forEach(t=>{
+        const o = document.createElement('option'); o.value = t; o.textContent = t[0].toUpperCase()+t.slice(1);
+        toneSelect.appendChild(o);
+      });
+
+      // fields
       fields.innerHTML = '';
-      t.inputs.forEach(i=>{
-        const wrap = document.createElement('div');
-        wrap.style.marginTop='10px';
-        const lbl = document.createElement('label'); lbl.textContent = i.label; lbl.htmlFor = 'f-'+i.id;
-        const inp = document.createElement('input'); inp.id = 'f-'+i.id; inp.placeholder = i.ph; inp.type='text'; inp.style.marginTop='6px';
-        inp.addEventListener('input',updatePreview);
-        wrap.appendChild(lbl); wrap.appendChild(inp); fields.appendChild(wrap);
+      (tpl.inputs||[]).forEach(inp=>{
+        const w = document.createElement('div'); w.style.marginTop='10px';
+        const lbl = document.createElement('label'); lbl.textContent = inp.label; lbl.htmlFor = 'f-'+inp.id;
+        let el;
+        if(inp.type==='textarea'){
+          el = document.createElement('textarea'); el.rows=3;
+        } else {
+          el = document.createElement('input'); el.type='text';
+        }
+        el.id = 'f-'+inp.id; el.placeholder = inp.ph || ''; el.style.marginTop='6px';
+        w.appendChild(lbl); w.appendChild(el); fields.appendChild(w);
       });
+
+      // prefill preview with built message (using placeholders)
       updatePreview();
     }
 
-    function values(){
-      const t = templates[scenario.value];
-      const vals = {};
-      t.inputs.forEach(i=>{ const el = document.getElementById('f-'+i.id); vals[i.id] = (el && el.value.trim())?el.value.trim():i.ph; });
-      return vals;
+    function valuesFromFields(){
+      const tpl = templates[activeKey];
+      const out = {};
+      (tpl.inputs||[]).forEach(i=>{
+        const el = document.getElementById('f-'+i.id);
+        out[i.id] = el && el.value.trim() ? el.value.trim() : (i.ph || '');
+      });
+      return out;
     }
 
-    function updatePreview(){ preview.textContent = templates[scenario.value].build(values()); }
+    function updatePreview(){
+      const tpl = templates[activeKey];
+      try{
+        const tone = toneSelect.value || (tpl.tones && tpl.tones[0]) || 'default';
+        const v = valuesFromFields();
+        const built = (typeof tpl.build === 'function') ? tpl.build(v,tone) : (tpl.build || '');
+        preview.textContent = built;
+      }catch(e){ preview.textContent = 'Error building template: '+String(e); }
+    }
 
-    copyBtn.addEventListener('click',function(){
+    // Actions
+    document.getElementById('generateBtn').addEventListener('click',updatePreview);
+    document.getElementById('copyBtn').addEventListener('click',()=>{
       const text = preview.textContent || '';
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(text).then(()=>flashCopied(),()=>fallbackCopy(text));
-      } else fallbackCopy(text);
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>flash('Copied!'),()=>fallbackCopy(text)); }
+      else fallbackCopy(text);
     });
+    document.getElementById('resetBtn').addEventListener('click',()=>{ (templates[activeKey].inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); if(el) el.value=''; }); updatePreview(); });
 
-    function fallbackCopy(text){
-      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
-      try{ document.execCommand('copy'); flashCopied(); }catch(e){ alert('Copy failed — select and copy manually.'); }
-      ta.remove();
-    }
+    function fallbackCopy(text){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); flash('Copied!'); }catch(e){ alert('Copy failed — select and copy manually.'); } ta.remove(); }
+    function flash(msg){ const old = document.getElementById('copyBtn'); const prev = old.textContent; old.textContent = msg; old.style.background = 'var(--accent)'; setTimeout(()=>{ old.textContent = prev; old.style.background=''; },1200); }
 
-    function flashCopied(){ copyBtn.textContent='Copied!'; copyBtn.style.background='#10b981'; setTimeout(()=>{copyBtn.textContent='Copy to Clipboard'; copyBtn.style.background=''},1200); }
+    // live update when fields or tone change
+    document.addEventListener('input',function(e){ if(e.target && e.target.id && e.target.id.startsWith('f-')) updatePreview(); });
+    toneSelect.addEventListener('change',updatePreview);
+    scenarioSearch.addEventListener('input',()=>renderTemplates(scenarioSearch.value));
 
-    scenario.addEventListener('change',renderFields);
-    populateScenarios(); scenario.value='payment-request'; renderFields();
+    // initialize
+    renderTemplates(); renderActiveTemplate();
+
   })();
   </script>
 </body>
