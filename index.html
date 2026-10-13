@@ -10,9 +10,8 @@
     :root{--bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--accent:#10b981;--border:#e2e8f0;--r:14px}
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center}
-    .wrap{width:100%;max-width:760px;margin:28px auto;padding:18px}
-    .grid{display:grid;grid-template-columns:1fr 2fr;gap:16px}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 6px 18px rgba(2,6,23,0.04)}
+    .wrap{width:100%;max-width:520px;margin:28px auto;padding:18px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:0 4px 10px rgba(2,6,23,0.04)}
     h1{color:var(--primary);font-size:1.25rem;margin-bottom:12px}
     label{font-size:0.75rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
     select,input,textarea{width:100%;padding:10px;margin-top:6px;border-radius:10px;border:1px solid var(--border);background:#fafafa}
@@ -22,59 +21,50 @@
     .meta{font-size:12px;color:var(--muted);margin-top:6px}
     .tag{display:inline-block;background:#eef2ff;color:var(--primary);padding:6px 8px;border-radius:999px;margin-right:6px;font-size:12px}
     .controls{display:flex;gap:8px;align-items:center;margin-top:12px}
-    .templates-list{max-height:360px;overflow:auto}
-    .tpl-item{padding:10px;border-radius:8px;border:1px solid transparent;cursor:pointer}
-    .tpl-item:hover{background:#fbfdff}
-    .tpl-item.active{border-color:var(--primary);background:#f8f7ff}
     .small{font-size:13px;color:var(--muted)}
     footer{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}
-    @media (max-width:780px){.grid{grid-template-columns:1fr;}.wrap{padding:12px}}
+    @media (max-width:420px){.wrap{padding:12px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>✍️ ScriptFlip</h1>
-    <div class="grid">
-      <div class="card templates-list" id="templatesCard">
-        <label for="scenarioSearch">Find a template</label>
-        <input id="scenarioSearch" placeholder="Search by name, tag, or purpose" />
-        <div class="meta">Tip: try "payment", "cancel", "roommate", or "resignation"</div>
-        <div id="templates" style="margin-top:10px"></div>
+    <div class="card">
+      <h1>✍️ ScriptFlip</h1>
+      <div>
+        <label for="scenario">Choose a template</label>
+        <select id="scenario"></select>
+        <div class="meta">Templates include tone variants and are built from descriptive slugs.</div>
       </div>
 
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
-          <div>
-            <div id="tplTitle" style="font-weight:800;font-size:1rem">Loading…</div>
-            <div id="tplDesc" class="meta">Choose a template to see details.</div>
-            <div id="tplTags" style="margin-top:8px"></div>
-          </div>
-          <div style="text-align:right">
-            <label class="small">Tone</label>
-            <select id="toneSelect" style="min-width:140px;margin-top:6px"></select>
-          </div>
-        </div>
-
-        <div id="fields" style="margin-top:12px"></div>
-
-        <div class="controls">
-          <button id="generateBtn" class="btn">Generate</button>
-          <button id="copyBtn" class="btn btn-ghost">Copy</button>
-          <button id="resetBtn" class="btn btn-ghost">Reset</button>
-        </div>
-
-        <div id="preview" class="out">Your generated message will appear here.</div>
+      <div id="tplMeta" style="margin-top:12px">
+        <div id="tplTitle" style="font-weight:800;font-size:1rem;margin-top:8px">Loading…</div>
+        <div id="tplDesc" class="meta">Choose a template to see details.</div>
+        <div id="tplTags" style="margin-top:8px"></div>
       </div>
+
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;margin-top:12px">
+        <div style="flex:1">
+          <label class="small">Tone</label>
+          <select id="toneSelect" style="min-width:140px;margin-top:6px"></select>
+        </div>
+      </div>
+
+      <div id="fields" style="margin-top:12px"></div>
+
+      <div class="controls">
+        <button id="generateBtn" class="btn">Generate</button>
+        <button id="copyBtn" class="btn btn-ghost">Copy</button>
+        <button id="resetBtn" class="btn btn-ghost">Reset</button>
+      </div>
+
+      <div id="preview" class="out">Your generated message will appear here.</div>
     </div>
-
     <footer>Privacy-first. Everything runs in your browser — no network calls.</footer>
   </div>
 
   <script>
   (function(){
-    // Templates now include more explicit slugs, titles, descriptions, tags and tone variants.
     const templates = {
-      // Payment reminder with polite and firm tones
       "payment-request-polite-reminder":{
         title: "Payment Reminder — Polite",
         description: "A gentle reminder to a friend or acquaintance about an outstanding payment.",
@@ -171,113 +161,69 @@
       }
     };
 
-    // Keep an index of template keys for search
-    const tplKeys = Object.keys(templates);
-
-    // Elements
-    const templatesEl = document.getElementById('templates');
+    const scenario = document.getElementById('scenario');
     const tplTitle = document.getElementById('tplTitle');
     const tplDesc = document.getElementById('tplDesc');
     const tplTags = document.getElementById('tplTags');
     const fields = document.getElementById('fields');
     const preview = document.getElementById('preview');
     const toneSelect = document.getElementById('toneSelect');
-    const scenarioSearch = document.getElementById('scenarioSearch');
 
-    let activeKey = tplKeys[0];
-
-    function prettyLabel(slug){
-      // Convert slug to readable title if no explicit title
-      return (templates[slug].title) || slug.split(/[-_]/).map(s=>s[0].toUpperCase()+s.slice(1)).join(' ');
+    function prettyLabel(key){
+      return (templates[key].title) || key.split(/[-_]/).map(s=>s.replace(/^[a-z]/,c=>c.toUpperCase())).join(' ');
     }
 
-    function renderTemplates(filter){
-      templatesEl.innerHTML = '';
-      const q = (filter||'').toLowerCase().trim();
-      tplKeys.forEach(k=>{
-        const tpl = templates[k];
-        const matches = !q || [k,tpl.title,(tpl.description||''), (tpl.tags||[]).join(' ')].join(' ').toLowerCase().includes(q);
-        if(!matches) return;
-        const div = document.createElement('div');
-        div.className = 'tpl-item' + (k===activeKey? ' active':'');
-        div.innerHTML = `<div style="font-weight:700">${prettyLabel(k)}</div><div class="small">${tpl.description || ''}</div>`;
-        div.addEventListener('click',()=>{ activeKey = k; renderActiveTemplate(); renderTemplates(scenarioSearch.value); });
-        templatesEl.appendChild(div);
+    function populateScenarios(){
+      Object.keys(templates).forEach(key=>{
+        const opt = document.createElement('option');
+        opt.value = key; opt.textContent = prettyLabel(key);
+        scenario.appendChild(opt);
       });
+      scenario.value = Object.keys(templates)[0];
     }
 
-    function renderActiveTemplate(){
-      const tpl = templates[activeKey];
-      tplTitle.textContent = tpl.title || prettyLabel(activeKey);
-      tplDesc.textContent = tpl.description || '';
-      tplTags.innerHTML = (tpl.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('');
+    function renderFields(){
+      const t = templates[scenario.value];
+      tplTitle.textContent = t.title || prettyLabel(scenario.value);
+      tplDesc.textContent = t.description || '';
+      tplTags.innerHTML = (t.tags||[]).map(x=>`<span class="tag">${x}</span>`).join('');
 
       // tone options
       toneSelect.innerHTML = '';
-      (tpl.tones || ['default']).forEach(t=>{
-        const o = document.createElement('option'); o.value = t; o.textContent = t[0].toUpperCase()+t.slice(1);
-        toneSelect.appendChild(o);
-      });
+      (t.tones || ['default']).forEach(tt=>{ const o=document.createElement('option'); o.value=tt; o.textContent = tt[0].toUpperCase()+tt.slice(1); toneSelect.appendChild(o); });
 
-      // fields
       fields.innerHTML = '';
-      (tpl.inputs||[]).forEach(inp=>{
-        const w = document.createElement('div'); w.style.marginTop='10px';
-        const lbl = document.createElement('label'); lbl.textContent = inp.label; lbl.htmlFor = 'f-'+inp.id;
-        let el;
-        if(inp.type==='textarea'){
-          el = document.createElement('textarea'); el.rows=3;
-        } else {
-          el = document.createElement('input'); el.type='text';
-        }
-        el.id = 'f-'+inp.id; el.placeholder = inp.ph || ''; el.style.marginTop='6px';
-        w.appendChild(lbl); w.appendChild(el); fields.appendChild(w);
+      (t.inputs||[]).forEach(i=>{
+        const wrap = document.createElement('div'); wrap.style.marginTop='10px';
+        const lbl = document.createElement('label'); lbl.textContent = i.label; lbl.htmlFor = 'f-'+i.id;
+        const inp = (i.type==='textarea')? document.createElement('textarea') : document.createElement('input');
+        if(i.type==='textarea') inp.rows=3; else inp.type='text';
+        inp.id='f-'+i.id; inp.placeholder = i.ph || ''; inp.style.marginTop='6px';
+        inp.addEventListener('input',updatePreview);
+        wrap.appendChild(lbl); wrap.appendChild(inp); fields.appendChild(wrap);
       });
-
-      // prefill preview with built message (using placeholders)
       updatePreview();
     }
 
-    function valuesFromFields(){
-      const tpl = templates[activeKey];
-      const out = {};
-      (tpl.inputs||[]).forEach(i=>{
-        const el = document.getElementById('f-'+i.id);
-        out[i.id] = el && el.value.trim() ? el.value.trim() : (i.ph || '');
-      });
-      return out;
+    function values(){
+      const t = templates[scenario.value]; const vals={};
+      (t.inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); vals[i.id] = (el && el.value.trim())? el.value.trim() : (i.ph || ''); });
+      return vals;
     }
 
-    function updatePreview(){
-      const tpl = templates[activeKey];
-      try{
-        const tone = toneSelect.value || (tpl.tones && tpl.tones[0]) || 'default';
-        const v = valuesFromFields();
-        const built = (typeof tpl.build === 'function') ? tpl.build(v,tone) : (tpl.build || '');
-        preview.textContent = built;
-      }catch(e){ preview.textContent = 'Error building template: '+String(e); }
-    }
+    function updatePreview(){ preview.textContent = templates[scenario.value].build(values(), toneSelect.value || ''); }
 
-    // Actions
     document.getElementById('generateBtn').addEventListener('click',updatePreview);
-    document.getElementById('copyBtn').addEventListener('click',()=>{
-      const text = preview.textContent || '';
-      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>flash('Copied!'),()=>fallbackCopy(text)); }
-      else fallbackCopy(text);
-    });
-    document.getElementById('resetBtn').addEventListener('click',()=>{ (templates[activeKey].inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); if(el) el.value=''; }); updatePreview(); });
+    document.getElementById('copyBtn').addEventListener('click',function(){ const text = preview.textContent || ''; if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(()=>flash('Copied!'),()=>fallbackCopy(text)); } else fallbackCopy(text); });
+    document.getElementById('resetBtn').addEventListener('click',function(){ const t = templates[scenario.value]; (t.inputs||[]).forEach(i=>{ const el=document.getElementById('f-'+i.id); if(el) el.value=''; }); updatePreview(); });
 
     function fallbackCopy(text){ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); try{ document.execCommand('copy'); flash('Copied!'); }catch(e){ alert('Copy failed — select and copy manually.'); } ta.remove(); }
-    function flash(msg){ const old = document.getElementById('copyBtn'); const prev = old.textContent; old.textContent = msg; old.style.background = 'var(--accent)'; setTimeout(()=>{ old.textContent = prev; old.style.background=''; },1200); }
+    function flash(msg){ const btn=document.getElementById('copyBtn'); const prev=btn.textContent; btn.textContent=msg; btn.style.background='var(--accent)'; setTimeout(()=>{ btn.textContent=prev; btn.style.background=''; },1200); }
 
-    // live update when fields or tone change
-    document.addEventListener('input',function(e){ if(e.target && e.target.id && e.target.id.startsWith('f-')) updatePreview(); });
+    scenario.addEventListener('change',renderFields);
     toneSelect.addEventListener('change',updatePreview);
-    scenarioSearch.addEventListener('input',()=>renderTemplates(scenarioSearch.value));
 
-    // initialize
-    renderTemplates(); renderActiveTemplate();
-
+    populateScenarios(); renderFields();
   })();
   </script>
 </body>
